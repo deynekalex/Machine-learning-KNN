@@ -1,1 +1,1 @@
-# Machine-learning-KNN-
+This is simple implementation of KNN algorithm
