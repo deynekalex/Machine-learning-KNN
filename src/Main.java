@@ -14,8 +14,8 @@ public class Main {
     public static void main(String[] arg) {
         //reading dataset from file
         DataSet dataSet = new DataSet("input/chips.txt", 2);
-        //
         dataSet.shuffle();
+        //visualize
         JFrame f = new JFrame("KNN");
         f.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {System.exit(0);}
@@ -26,10 +26,11 @@ public class Main {
         f.pack();
         f.setSize(new Dimension(800,800));
         f.setVisible(true);
-        //main
+        //get 80% to analyze and 20% to test
         DataSet build = new DataSet();
         DataSet test = new DataSet();
         dataSet.split(build, test, 0.8);
+        //get 4 parts of analyze set
         ArrayList<DataSet> list = new ArrayList<>();
         list.add(new DataSet());
         list.add(new DataSet());
@@ -41,7 +42,7 @@ public class Main {
         ds1.split(list.get(0), list.get(1), 0.5);
         ds2.split(list.get(2), list.get(3), 0.5);
         double max = 0;
-        double maxk = 0;
+        int maxk = 0;//k with best result
         for (int k = 1; k < 10; k++) {
             double res = 0;
             for (int i = 0; i < 4; i++) {
@@ -56,28 +57,54 @@ public class Main {
                 }
                 res += testing(initial, input, k);
             }
-            res = res/4;
+            res = res / 4;//ищем среднее
             System.out.println(k);
-            System.out.println(max);
+            System.out.println(res);
             System.out.println();
-            if (res > max){
+            if (res > max) {
                 max = res;
                 maxk = k;
             }
         }
-        System.out.println(maxk);
-        System.out.println(max);
+        System.out.println("Наилучший результат = " + max + ". При k = " + maxk);
+        DataSet initial = new DataSet();
+        for (int i = 0; i < 4; i++)
+            initial.merge(list.get(i));
+        double res = testing(initial, test, maxk);
+        System.out.println("В итоге = " + res);
     }
 
     public static double testing(DataSet initial, DataSet input, int k) {
+        //1 - истина
+        //0 - ложь
+        int TP = 0;
+        int TN = 0;
+        int FP = 0;
+        int FN = 0;
         int good = 0;
         for (ArrayList point1 : input.data) {
             int assumption = findassumption(initial, point1, k);
             if (assumption == (int) point1.get(0))
                 good++;
+            if (assumption == 0){
+                if ((int)point1.get(0) == 0)
+                    TP++;
+                else
+                    FP++;
+            }else{
+                if ((int)point1.get(0) == 1)
+                    TN++;
+                else
+                    FN++;
+            }
         }
+        double precision = (double)TP/(TP+FP);
+        double recall = (double)TP/(TP+FN);
+        return 2*precision*recall/(precision+recall);
+    }
 
-        return (double) good / input.getSize();
+    public static double accuracy(int p, int n){
+        return p/n;
     }
 
     public static int findassumption(DataSet initial, ArrayList point, int k) {
