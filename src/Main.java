@@ -30,7 +30,7 @@ public class Main {
         DataSet build = new DataSet();
         DataSet test = new DataSet();
         dataSet.split(build, test, 0.8);
-        //get 4 parts of analyze set
+        //get 4 parts of build set
         ArrayList<DataSet> list = new ArrayList<>();
         list.add(new DataSet());
         list.add(new DataSet());
